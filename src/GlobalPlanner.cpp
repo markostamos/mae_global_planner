@@ -5,10 +5,6 @@
 #include <chrono>
 #include <iostream>
 
-GlobalPlanner::GlobalPlanner(float &&resource_sharing_bias)
-{
-    resource_sharing_bias_ = resource_sharing_bias;
-}
 void GlobalPlanner::initialize(const std::vector<Path> &plan_paths)
 {
     current_plan_ = GlobalPlan(plan_paths, resource_sharing_bias_);

@@ -29,6 +29,7 @@ private:
     int subtour_len_;
 
 public:
+    SubtourPlanner(){};
     /**
      * @brief Construct a new Subtour G A object
      *
@@ -51,7 +52,7 @@ public:
      * @param subtour_length Number of targets in each subtour.
      * @param starting_position The first point in the subtour that remains fixed throughout the evolution.
      */
-    void initialize(const std::vector<Point> &targets, const int &&subtour_length, const Point &starting_position);
+    void initialize(const std::vector<Point> &targets, int subtour_length, const Point &starting_position);
 
     /**
      * @brief Evolves the population for a single generation.
@@ -65,7 +66,7 @@ public:
      * @param timeout_ms Time limit in milliseconds.
      * @param info If true, prints cost information when a new best path is found.
      */
-    void evolve(int &&timeout_ms, bool info = false);
+    void evolve(int timeout_ms, bool info = false);
 
     /**
      * @brief Returns the current population.

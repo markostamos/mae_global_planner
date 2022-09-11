@@ -1,0 +1,4 @@
+PointArray[] paths
+int32 timeout_ms
+---
+PointArray[] global_plan 

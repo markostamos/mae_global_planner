@@ -22,7 +22,7 @@ SubtourPlanner::SubtourPlanner(int &&population_size,
     social_disaster_rate_ = social_disaster_rate;
 }
 
-void SubtourPlanner::initialize(const std::vector<Point> &targets, const int &&subtour_len, const Point &starting_position)
+void SubtourPlanner::initialize(const std::vector<Point> &targets, int subtour_len, const Point &starting_position)
 {
     if (targets.empty())
         throw std::invalid_argument("Targets vector is empty");
@@ -31,8 +31,8 @@ void SubtourPlanner::initialize(const std::vector<Point> &targets, const int &&s
 
     subtour_len_ = subtour_len;
     targets_ = targets;
-
     starting_position_ = starting_position;
+    population_.clear();
 
     // Random shuffling to avoid 2 copies of the same point in a path.
     std::vector<int> selection_pool(targets_.size());
@@ -184,7 +184,7 @@ void SubtourPlanner::optSwapHeuristic(Path *path, float p2opt_rate)
     }
 }
 
-void SubtourPlanner::evolve(int &&timeout_ms, bool info)
+void SubtourPlanner::evolve(int timeout_ms, bool info)
 {
     auto start = std::chrono::high_resolution_clock::now();
     auto end = std::chrono::high_resolution_clock::now();

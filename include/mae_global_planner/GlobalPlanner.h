@@ -26,7 +26,8 @@ private:
     GlobalPlan best_plan_;
 
 public:
-    GlobalPlanner(float &&resource_sharing_bias);
+    GlobalPlanner(){};
+    GlobalPlanner(float &&resource_sharing_bias) : resource_sharing_bias_(resource_sharing_bias) {}
 
     /**
      * @brief Initializes the global planner with a set of pre computed optimal subpaths.
