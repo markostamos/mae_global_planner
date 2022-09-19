@@ -192,7 +192,7 @@ void SubtourPlanner::evolve(int timeout_ms, bool info)
 
     int generation = 0;
     float best_length = std::numeric_limits<float>::max();
-    while (duration < timeout_ms)
+    while (duration < timeout_ms && subtour_len_ > 1)
     {
         evolutionStep();
         end = std::chrono::high_resolution_clock::now();

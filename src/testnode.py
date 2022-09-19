@@ -5,10 +5,19 @@ from mae_global_planner.srv import SubtourPlanService, SubtourPlanServiceRequest
 from mae_global_planner.srv import GlobalPlanService, GlobalPlanServiceRequest, GlobalPlanServiceResponse
 from mae_global_planner.msg import PointArray
 from geometry_msgs.msg import Point
+from std_msgs.msg import Empty
+
+
+def callback(msg):
+    rospy.loginfo("called succesffully")
+
+
 import math
 if __name__ == "__main__":
     rospy.init_node("test_node")
     rospy.loginfo("Starting test_node")
+
+    test_subscriber = rospy.Subscriber("test", Empty, callback)
     rospy.wait_for_service("make_subtour")
     rospy.wait_for_service("make_global_plan")
     rospy.loginfo("Services are available")
@@ -35,7 +44,7 @@ if __name__ == "__main__":
     subtour_plan_service_request.targets = point_array
     subtour_plan_service_request.starting_position = Point(0.0, 0.0, 0.0)
     subtour_plan_service_request.subtour_length = 10
-    subtour_plan_service_request.timeout_ms = 500
+    subtour_plan_service_request.timeout_ms = 2000
     subtour_plan_service_response = subtour_plan_service(subtour_plan_service_request)
 
     # calculate distance of response
@@ -45,3 +54,4 @@ if __name__ == "__main__":
                                       ** 2 + (subtour_plan_service_response.subtour.points[i].y - subtour_plan_service_response.subtour.points[i + 1].y)**2)
     # print distance
     rospy.loginfo("Subtour distance: %f", subtour_distance)
+    rospy.spin()
