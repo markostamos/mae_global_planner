@@ -16,15 +16,15 @@ find_package(catkin REQUIRED COMPONENTS
 
 
 ## Generate messages in the 'msg' folder
- add_message_files(
-   FILES
-   PointArray.msg
- )
+add_message_files(
+    FILES
+    PointArray.msg
+)
 
 ## Generate services in the 'srv' folder
   add_service_files(
    FILES
-   SubtourPlanService.srv
+   PlanService.srv
    GlobalPlanService.srv
  )
 
@@ -71,7 +71,6 @@ include_directories(
 )
 
 add_library(global_planner src/GlobalPlanner.cpp)
-add_library(subtour_planner src/SubtourPlanner.cpp)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -97,7 +96,6 @@ add_executable(global_planner_node src/global_planner_node.cpp)
  target_link_libraries(global_planner_node
    ${catkin_LIBRARIES}
     global_planner
-    subtour_planner
  )
 
 #############

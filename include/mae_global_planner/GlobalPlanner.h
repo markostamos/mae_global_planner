@@ -1,104 +1,145 @@
-#ifndef GLOBAL_PLANNER_H
-#define GLOBAL_PLANNER_H
-
+#ifndef SUBTOUR_GA_H
+#define SUBTOUR_GA_H
+#include <vector>
 #include <mae_global_planner/Structs.h>
-
 class GlobalPlanner
 {
     /**
-     * @brief Class responsible for generating a global optimal plan given a set of local optimal paths by
-     *        minimizing the Cost function = max_subtour_len + resource_sharing_bias * subtour_variance.
-     *        A plan consists of a set of subtours, to a total of NUMBER_OF_TARGETS subtours and gets
-     *        evolved using a genetic algorithm with the following operators:
-     *          -Crossover: Double cutting point crossover.
-     *          -2-opt: 2-opt heuristic applied to each subtour.
-     *          -extended 2-opt: 2-opt heuristic between two subtours
-     *
-     * @param resource_sharing_bias How much the global plan cost should be shared between the individual plans
-     *
+     * @brief Class that implements a genetic algorithm for solving the Subtour traveling salesman problem.
+     *        It is used to generate a set of paths that are then used by the Global Planner to generate
+     *        an optimal team strategy.
+     *        It uses the following operators:
+     *         - Tournament selection
+     *         - Mutation (Introduces new points in the path)
+     *         - 2-opt (Locally optimizes the path)
+     *         - Social disaster (Randomly discards a percentage of the population)
+     *         - Elitism (The best path(Subtour) is always retained in the population)
      */
-
 public:
-    float resource_sharing_bias_;
+    float mutation_rate_;
+    float p2opt_rate_;
+    float social_disaster_rate_;
+    int tournament_size_;
 
 private:
-    GlobalPlan current_plan_;
-    GlobalPlan best_plan_;
+    std::vector<Path> population_;
+    std::vector<Point> targets_;
+    Point starting_position_;
+    int population_size_;
+    int subtour_len_;
 
 public:
     GlobalPlanner(){};
-    GlobalPlanner(float &&resource_sharing_bias) : resource_sharing_bias_(resource_sharing_bias) {}
-
     /**
-     * @brief Initializes the global planner with a set of pre computed optimal subpaths.
+     * @brief Construct a new plannerobject
      *
-     * @param plan The set of pre computed optimal subpaths.
+     * @param population_size Size of the population to be evolved.
+     * @param tournament_size Size of the tournament used for selection. Bigger tournament size means less diversity in the population selection.
+     * @param mutation_rate Probability of a mutation occuring in a path (0-1).
+     * @param p2opt_rate Probability of a 2-opt local optimization occuring in a path(0-1).
+     * @param social_disaster_rate Percentage of the population that is randomly discarded in each generation(0-1).
      */
-    void initialize(const std::vector<Path> &plan);
+    GlobalPlanner(int &&population_size,
+                  int &&tournament_size,
+                  float &&mutation_rate,
+                  float &&p2opt_rate,
+                  float &&social_disaster_rate);
 
     /**
-     * @brief Calculates the next generation of the global plan.
+     * @brief Initializes the genetic algorithm.
+     *
+     * @param targets Total number of targets available to be used in the subtour.
+     * @param subtour_length Number of targets in each subtour.
+     * @param starting_position The first point in the subtour that remains fixed throughout the evolution.
+     */
+    void initialize(const std::vector<Point> &targets, int subtour_length, const Point &starting_position);
+
+    /**
+     * @brief Evolves the population for a single generation.
+     *
      */
     void evolutionStep();
 
     /**
-     * @brief Evolves the current global plan until the timeout is reached.
+     * @brief Evolvues the population until time limit is reached.
      *
-     * @param timeout_ms timeout in milliseconds.
-     * @param info Print info about the new best plan when it is found.
+     * @param timeout_ms Time limit in milliseconds.
+     * @param info If true, prints cost information when a new best path is found.
      */
     void evolve(int timeout_ms, bool info = false);
 
     /**
-     * @brief Returns the current global plan.
+     * @brief Returns the current population.
      *
-     * @returns The current global plan.
+     * @return Path
      */
-    const GlobalPlan &getPlan() const;
+    const std::vector<Path> &getPopulation() const;
+
+    float getAveragePathLen(std::vector<Path> paths = {}) const;
+
+    Path getBestPath(std::vector<Path> paths = {}) const;
 
     /**
-     * @brief Returns the best global plan found so far.
+     * @brief Kmeans clustering to assign targets to each agent.
      *
-     * @returns The best global plan found so far.
+     * @param points Targets to be clustered.
+     * @param k Number of clusters.
+     * @param centroids Initial centroids(agent's starting positions).
+     * @param max_iterations Maximum number of iterations before algorithm ends.
+     * @param tolerance Distance tolerance in meters for convergence.
+     * @return std::vector<std::vector<Point>>
      */
-    const GlobalPlan &getBestPlan() const;
+    static std::vector<std::vector<Point>> kmeans(std::vector<Point> &points, int k, std::vector<Point> &centroids, int max_iterations, float tolerance);
 
 private:
     /**
-     * @brief Performs 2-cut Point crossover between all the subtours in the current plan
-     *        iteratively mating the best and worst subtours until the new plan is complete.
+     * @brief Local optimization of a path using the 2-opt heuristic.
+     * @param Path to be optimized.
+     * @param p2opt_rate Probability of a 2-opt local optimization occuring in the path(0-1).
      */
-    void crossover();
+    void optSwapHeuristic(Path *path, float p2opt_rate);
 
     /**
-     * @brief Removes intersections between the subtours in the current plan.
-     * @param Path1 to be altered.
-     * @param Path2 to be altered.
+     * @brief Applies genetic operators to the mating pool to generate a new population.
+     * @param mating_pool
+     * @param new_population
      */
-    void removeIntersectionsFromPath(Path *path1, Path *path2);
+    void geneticOperators(std::vector<Path> *mating_pool, std::vector<Path> *new_population);
 
     /**
-     * @brief Removes intersections in the whole Global Plan.
+     * @brief Removes the worst paths from the population.
+     * @param new_population
      */
-    void removeIntersections();
+    void removeWorstPaths(std::vector<Path> *new_population);
 
     /**
-     * @brief Performs 2-opt heuristic to locally optimize each subtour.
+     * @brief Mutates a path by introducing new points in it, thus exploring new solutions.
+     * @param path
+     * @param mutation_rate Probability of a mutation occuring in a path (0-1).
      */
-    void simpleOptSwap();
+    void mutate(Path *path, float mutation_rate);
 
     /**
-     * @brief Performs extended 2-opt heuristic to each pair of subtours in the current global plan.
+     * @brief Performs a tournament selection to select the best paths from the population.
+     * @param mating_pool
+     * @param new_population
+     * @param tournament_size Size of the tournament used for selection. Bigger tournament size means less diversity in the population selection.
      */
-    void extendedOptHeuristic();
+    void selection(std::vector<Path> *mating_pool, std::vector<Path> *new_population, int tournament_size);
 
     /**
-     * @brief Performs 2-opt heuristic to locally optimize two subtours.
-     *
-     * @param path1 to be altered.
-     * @param path2 to be altered.
+     * @brief Performs a social disaster, randomly discarding a percentage of the population.
+     * @param new_population
+     * @param tournament_size Size of the tournament used for selection. Bigger tournament size means less diversity in the population selection.
+     * @param social_disaster_rate Percentage of the population that is randomly discarded in each generation(0-1).
      */
-    void twoPathOptSwap(Path *path1, Path *path2);
+    void socialDisaster(std::vector<Path> *new_population, float social_disaster_rate);
+
+    /**
+     * @brief Adds the best path to the new population.
+     * @param new_population
+     */
+    void elitisism(std::vector<Path> *new_population);
 };
 
-#endif // GLOBAL_PLANNER_H
+#endif // SUBTOUR_GA_H

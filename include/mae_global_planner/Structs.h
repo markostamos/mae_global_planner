@@ -18,11 +18,11 @@ struct Point
 
     Point(float x, float y, float z) : x(x), y(y), z(z) {}
 
-    inline float dist2(const Point &p)
+    inline float dist2(const Point &p) const
     {
         return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2));
     }
-    inline float dist3(const Point &p)
+    inline float dist3(const Point &p) const
     {
         return pow(x - p.x, 2) + pow(y - p.y, 2) + pow(z - p.z, 2);
     }
@@ -66,7 +66,7 @@ public:
         {
             for (int i = 0; i < points_.size() - 1; i++)
             {
-                length_ += points_[i].dist2(points_[i + 1]);
+                length_ += points_[i].dist3(points_[i + 1]);
             }
         }
     }
@@ -166,69 +166,6 @@ public:
     }
 };
 
-struct GlobalPlan
-{
-    /**
-     * @brief Struct that represents a single Global Plan and exposes some useful methods
-     *       for its manipulation and overloads operatos for common operations.
-     */
-private:
-    std::vector<Path> paths_;
-    float cost_;
-    float bias_;
-
-public:
-    GlobalPlan(){};
-
-    GlobalPlan(const std::vector<Path> &paths, float bias)
-    {
-        bias_ = bias;
-        paths_ = paths;
-        calculateCost();
-    }
-
-    void calculateCost()
-    {
-        float max_length = std::max_element(paths_.begin(), paths_.end())->getLength();
-        float variance = std::accumulate(paths_.begin(), paths_.end(), 0.0, [max_length](float a, Path p)
-                                         { return a + pow(max_length - p.getLength(), 2); });
-        variance = sqrt(variance / paths_.size());
-
-        cost_ = max_length + bias_ * variance;
-    }
-
-    inline void updatePlan(const std::vector<Path> &paths)
-    {
-        paths_ = paths;
-        calculateCost();
-    }
-
-    inline float getCost() const
-    {
-        return cost_;
-    }
-
-    const std::vector<Path> &getPaths() const
-    {
-        return paths_;
-    }
-
-    std::vector<Path> &getPathsRef()
-    {
-        return paths_;
-    }
-
-    inline bool operator<(const GlobalPlan &p) const
-    {
-        return this->cost_ < p.getCost();
-    }
-
-    inline bool operator>(const GlobalPlan &p) const
-    {
-        return !(*this < p);
-    }
-};
-typedef struct GlobalPlan GlobalPlan;
 typedef struct Path Path;
 typedef struct Point Point;
 #endif // STRUCTS_H

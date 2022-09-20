@@ -1,6 +1,5 @@
 PointArray targets
 geometry_msgs/Point starting_position
-int32 subtour_length
 int32 timeout_ms
 ---
-PointArray subtour
+PointArray plan
