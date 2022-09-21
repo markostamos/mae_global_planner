@@ -24,7 +24,7 @@ struct Point
     }
     inline float dist3(const Point &p) const
     {
-        return pow(x - p.x, 2) + pow(y - p.y, 2) + pow(z - p.z, 2);
+        return sqrt(pow(x - p.x, 2) + pow(y - p.y, 2) + pow(z - p.z, 2));
     }
 
     inline bool operator==(const Point &p) const
