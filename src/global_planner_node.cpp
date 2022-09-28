@@ -25,8 +25,8 @@ public:
                                         nh_private_.param("p2opt_rate", 0.3),
                                         nh_private_.param("social_disaster_rate", 0.1));
 
-        plan_service_ = nh_.advertiseService("make_plan", &GlobalPlannerNode::planCallback, this);
-        global_plan_service_ = nh_.advertiseService("make_global_plan", &GlobalPlannerNode::globalPlanCallback, this);
+        plan_service_ = nh_.advertiseService("global_planner_node/make_single_plan", &GlobalPlannerNode::planCallback, this);
+        global_plan_service_ = nh_.advertiseService("global_planner_node/make_global_plan", &GlobalPlannerNode::globalPlanCallback, this);
     }
 
 private:
