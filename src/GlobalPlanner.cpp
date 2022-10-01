@@ -205,7 +205,8 @@ void GlobalPlanner::evolve(int timeout_ms, bool info)
             std::cout << "Generation: " << generation << " Best: " << best_length << std::endl;
         }
     }
-    std::cout << "Finished in " << generation << " generations with length " << getBestPath().getLength() << std::endl;
+    if (info)
+        std::cout << "Finished in " << generation << " generations with length " << getBestPath().getLength() << std::endl;
 }
 
 void GlobalPlanner::socialDisaster(std::vector<Path> *new_population, float social_disaster_rate)
@@ -232,7 +233,7 @@ void GlobalPlanner::elitisism(std::vector<Path> *new_population)
     getRandomElementRef(*new_population) = getBestPath();
 }
 
-std::vector<std::vector<Point>> GlobalPlanner::kmeans(std::vector<Point> &points, int k, std::vector<Point> &centroids, int max_iterations, float tolerance)
+std::vector<std::vector<Point>> GlobalPlanner::kmeans(const std::vector<Point> &points, int k, std::vector<Point> &centroids, int max_iterations, float tolerance)
 {
     std::vector<std::vector<Point>> clusters(k);
     std::vector<Point> prev_centroids(k);
@@ -265,7 +266,10 @@ std::vector<std::vector<Point>> GlobalPlanner::kmeans(std::vector<Point> &points
             y += point.y;
             z += point.z;
         }
-        new_centroids[i] = Point(x / clusters[i].size(), y / clusters[i].size(), z / clusters[i].size());
+        if (!clusters[i].empty())
+            new_centroids[i] = Point(x / clusters[i].size(), y / clusters[i].size(), z / clusters[i].size());
+        else
+            new_centroids[i] = centroids[i];
     }
 
     // check convergence

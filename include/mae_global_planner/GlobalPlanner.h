@@ -89,7 +89,7 @@ public:
      * @param tolerance Distance tolerance in meters for convergence.
      * @return std::vector<std::vector<Point>>
      */
-    static std::vector<std::vector<Point>> kmeans(std::vector<Point> &points, int k, std::vector<Point> &centroids, int max_iterations, float tolerance);
+    static std::vector<std::vector<Point>> kmeans(const std::vector<Point> &points, int k, std::vector<Point> &centroids, int max_iterations, float tolerance);
 
 private:
     /**

@@ -140,4 +140,14 @@ inline mae_global_planner::PointArray toPointArray(const Path &path)
     return point_array;
 }
 
+// to geometry point
+inline geometry_msgs::Point toGeometryPoint(const Point &point)
+{
+    geometry_msgs::Point geometry_point;
+    geometry_point.x = point.x;
+    geometry_point.y = point.y;
+    geometry_point.z = point.z;
+    return geometry_point;
+}
+
 #endif // UTILS_H
