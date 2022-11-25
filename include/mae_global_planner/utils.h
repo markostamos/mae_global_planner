@@ -9,8 +9,8 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
-#include <geometry_msgs/Point.h>
-#include <mae_global_planner/PointArray.h>
+/* #include <geometry_msgs/Point.h>
+#include <mae_global_planner/PointArray.h> */
 
 #define logit(x) std::cout << (#x) << " = " << (x) << std::endl
 
@@ -26,6 +26,37 @@ inline std::vector<Point> createRandomPoints(int &&n, float &&min, float &&max)
         points[i] = Point(distr(gen), distr(gen), distr(gen));
     }
     return points;
+}
+
+inline Point getRandomPoint(float &&min, float &&max)
+{
+    std::random_device rd;                            // obtain a random number from hardware
+    std::mt19937 gen(rd());                           // seed the generator
+    std::uniform_real_distribution<> distr(min, max); // define the range
+    Point point;
+    point.x = distr(gen);
+    point.y = distr(gen);
+    point.z = distr(gen);
+    return point;
+}
+
+// create random points with gaussian distribution
+inline void createRandomPointsGaussian(std::vector<Point> *prev_points, int &&n, Point center_pt, float &&stddev, bool &&points3D)
+{
+    std::random_device rd;  // obtain a random number from hardware
+    std::mt19937 gen(rd()); // seed the generator
+    std::normal_distribution<> distrx(center_pt.x, stddev);
+    std::normal_distribution<> distry(center_pt.y, stddev);
+    std::normal_distribution<> distrz(center_pt.z, stddev);
+
+    // std::vector<Point> points(n);
+    for (int i = 0; i < n; i++)
+    {
+        if (points3D)
+            prev_points->emplace_back(distrx(gen), distry(gen), distrz(gen));
+        else
+            prev_points->emplace_back(distrx(gen), distry(gen), 0);
+    }
 }
 
 template <typename T>
@@ -107,7 +138,7 @@ void timeit(F &&f, Args &&...args)
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     std::cout << "Time taken by function: " << duration.count() << " milliseconds" << std::endl;
 }
-
+/*
 // struct Point from geometry_msgs::Point
 inline Point toPoint(const geometry_msgs::Point &point)
 {
@@ -148,6 +179,6 @@ inline geometry_msgs::Point toGeometryPoint(const Point &point)
     geometry_point.y = point.y;
     geometry_point.z = point.z;
     return geometry_point;
-}
+} */
 
 #endif // UTILS_H
